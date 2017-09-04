@@ -79,6 +79,7 @@ for directory, subdirs, files in os.walk(filepath):
                 ids.write('<li>ID: <span style="color: red;">{}</span></li><li>Type:  <span style="color: red;">{}</span></li></ul><hr>'.format('Missing', 'Missing'))
 
 print('Done! All items processed in ' + str(time.time() - timestart) + ' seconds.')
+print('You can find the item list in \'items.html\' that this script is located in.')
 
 ids.write('</body></html>')
 ids.close()
