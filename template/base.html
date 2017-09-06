@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Unturned Items IDs</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<style>
+	.error {
+		color: red;
+	}
+	</style>
+</head>
+
+<body>
+	<div class="jumbotron">
+		<div class="container">
+			<h2 class="text-center">Unturned Item IDs<br />
+	<small>All of your items in one file.</small><br />
+<small>CTRL + F to start looking for items!</small></h2>
+			<br />
+		</div>
+	</div>
+<div class="container">
+	<table class="table table-bordered table-striped">
+	  <thead>
+			<th>
+				<b>ID</b>
+			</th>
+			<th>
+				<b>Name</b>
+			</th>
+			<th>
+				<b>About</b>
+			</th>
+			<th>
+				<b>Type</b>
+			</th>
+		</thead>
+		<tbody>
+			{% for i in items if not i['Type'] in ['Storage', 'Water', 'NPC', 'Small',
+			 'Medium', 'Large', 'Resource'] %}
+				<tr class="item-row">
+					<td class="item-id">
+						<u>{{ i['ID']}}</u>
+					</td>
+					<td class="item-info">
+						{{ i['Name']}}
+					</td>
+					<td class="item-about">
+						{{ i['Description']}}
+					</td>
+					<td class="item-type">
+						{{ i['Type']}}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+</body>
+
+</html>
