@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import time
+import webbrowser
 import tkinter
 from tkinter import filedialog
 from jinja2 import Environment, FileSystemLoader
@@ -37,6 +38,9 @@ def main():
 
     print('Done! All items processed in ' + str(time.time() - timestart) + ' seconds.')
     print('You can find the item list in the "results" directory.')
+    print('Opening items list automatically...')
+    webbrowser.open('file://{}'.format(os.path.realpath('results/items.html')))
+    
 
 class Item():
     """Item class"""
