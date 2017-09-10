@@ -5,6 +5,39 @@ import tkinter
 from tkinter import filedialog
 from jinja2 import Environment, FileSystemLoader
 
+def main():
+    filepath = ''
+    root = tkinter.Tk()
+    root.withdraw()
+
+    #Bit of a mess, may improve later
+    while not (filepath.endswith('304930') or filepath.endswith('Content') or filepath.endswith('Bundles')):
+        print('Please navigate to your Unturned "Bundles" or "Workshop" directory.\n'
+              '(Directory named "Bundles" in Unturned folder, or "304930" in the Workshop folder.)')
+        filepath = filedialog.askdirectory()
+        print(filepath)
+        if (filepath.endswith('304930') or filepath.endswith('Content') or filepath.endswith('Bundles')):
+            print('This is probably an item bundles directory. Or at least I hope it is.\n')
+        else:
+            print('This is not a valid directory.')
+
+    print('Working... \n')
+    timestart = time.time()
+
+    items = scrape_items(filepath)
+
+    #Render template so I dont have to type a bunch of html
+    #in Python. I'm not doing that again. Ever.
+    env = Environment(loader=FileSystemLoader('template'))
+    template = env.get_template('base.html')
+    items_html = template.render(items=items)
+
+    with open('results/items.html', 'w+', encoding='utf8') as f:
+        f.write(items_html)
+
+    print('Done! All items processed in ' + str(time.time() - timestart) + ' seconds.')
+    print('You can find the item list in the "results" directory.')
+
 class Item():
     """Item class"""
     
@@ -90,61 +123,36 @@ def extract_name(filepath):
         
     return data
 
-filepath = ''
-root = tkinter.Tk()
-root.withdraw()
+def scrape_items(filepath, items=None):
+    items = []
+    for directory, subdirs, files in os.walk(filepath):
+        folder = directory.replace('\\', '/')
+        for name in files:
+            if 'English.dat' == name:
+                try:
+                    data = extract_name(folder + '/' + name)
+                    n = data['Name']
+                    d = data['Description']
+                except:
+                    n = '<span class="error">Missing</span>'
+                    d = '<span class="error">Missing</span>'
+                #Thanks to the mod creators who don't follow standard procedure
+                    
+                try:
+                    item = os.path.basename(os.path.normpath(folder))
+                    data = extract_id(folder + '/' + item + '.dat')
+                    i = data['ID']
+                    t = data['Type']
+                except:
+                    n = '<span class="error">Missing</span>'
+                    d = '<span class="error">Missing</span>'
 
-#Bit of a mess, may improve later
-while not (filepath.endswith('304930') or filepath.endswith('Content') or filepath.endswith('Bundles')):
-    print('Please navigate to your Unturned "Bundles" or "Workshop" directory.\n'
-          '(Directory named "Bundles" in Unturned folder, or "304930" in the Workshop folder.)')
-    filepath = filedialog.askdirectory()
-    print(filepath)
-    if (filepath.endswith('304930') or filepath.endswith('Content') or filepath.endswith('Bundles')):
-        print('This is probably an item bundles directory. Or at least I hope it is.\n')
-    else:
-        print('This is not a valid directory.')
-
-print('Working... \n')
-timestart = time.time()
-items = []
-
-for directory, subdirs, files in os.walk(filepath):
-    folder = directory.replace('\\', '/')
-    for name in files:
-        if 'English.dat' == name:
-            try:
-                data = extract_name(folder + '/' + name)
-                n = data['Name']
-                d = data['Description']
-            except:
-                n = '<span class="error">Missing</span>'
-                d = '<span class="error">Missing</span>'
-            #Thanks to the mod creators who don't follow standard procedure
+                item = Item(n, d, i, t)
+                items.append(item.get_clean())
                 
-            try:
-                item = os.path.basename(os.path.normpath(folder))
-                data = extract_id(folder + '/' + item + '.dat')
-                i = data['ID']
-                t = data['Type']
-            except:
-                n = '<span class="error">Missing</span>'
-                d = '<span class="error">Missing</span>'
+    items = sorted(items, key=lambda k: int(k['ID']))
+                
+    return items
 
-            item = Item(n, d, i, t)
-            items.append(item.get_clean())
-
-items = sorted(items, key=lambda k: int(k['ID'])) 
-
-#Render template so I dont have to type a bunch of html
-#in Python. I'm not doing that again. Ever.
-env = Environment(loader=FileSystemLoader('template'))
-template = env.get_template('base.html')
-items_html = template.render(items=items)
-
-with open('results/items.html', 'w+', encoding='utf8') as f:
-    f.write(items_html)
-
-print('Done! All items processed in ' + str(time.time() - timestart) + ' seconds.')
-print('You can find the item list in the "results" directory.')
-
+if __name__ == '__main__':
+    main()
